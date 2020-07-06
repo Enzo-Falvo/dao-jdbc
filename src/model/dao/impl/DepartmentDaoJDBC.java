@@ -2,6 +2,7 @@ package model.dao.impl;
 
 import db.DB;
 import db.DbException;
+import db.DbIntegrityException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -79,7 +80,18 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 
     @Override
     public void deleteById(Integer id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        PreparedStatement st = null;
+        try {
+            st = conn.prepareStatement("DELETE FROM department WHERE Id = ?");
+            
+            st.setInt(1, id);
+            
+            st.executeUpdate();
+        } catch (SQLException e) {
+            throw new DbIntegrityException(e.getMessage());
+        } finally {
+            DB.closeStatement(st);
+        }
     }
 
     @Override
