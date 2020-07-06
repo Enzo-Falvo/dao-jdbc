@@ -11,6 +11,7 @@ import java.util.List;
 import model.dao.DepartmentDao;
 import model.entities.Department;
 import java.sql.*;
+import model.entities.Seller;
 
 
 public class DepartmentDaoJDBC implements DepartmentDao {
@@ -28,13 +29,12 @@ public class DepartmentDaoJDBC implements DepartmentDao {
             st = conn.prepareStatement(
             
             "INSERT INTO department "
-            +"(Id, Name) "
+            +"(Name ) "
             +"VALUES "
-            +"(?, ?)",
+            +"(?)",
                     Statement.RETURN_GENERATED_KEYS);
             
-            st.setInt(1, obj.getId());
-            st.setString(2, obj.getName());
+            st.setString(1, obj.getName());
             
             int rowsAffected = st.executeUpdate();
             
@@ -69,7 +69,35 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 
     @Override
     public Department findById(Integer id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        PreparedStatement st = null;
+        ResultSet rs = null;
+        
+        try {
+            st = conn.prepareStatement(
+                    "SELECT * "
+                    + "FROM department "
+                    + "WHERE Id = ?");
+            
+            st.setInt(1, id);
+            rs = st.executeQuery();
+            
+            if (rs.next()) {
+                Department dep = new Department();
+                dep.setId(rs.getInt("Id"));
+                dep.setName(rs.getString("Name"));
+                
+                return dep;
+            }
+            return null;
+            
+        } 
+        catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } 
+        finally {
+            DB.closeStatement(st);
+            DB.closeResultSet(rs);
+        }
     }
 
     @Override
